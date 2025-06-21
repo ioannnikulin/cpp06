@@ -1,4 +1,5 @@
 *.o
+.vscode
 ex00/ScalarConverter
 ex01/Serializer
 ex02/Identify
