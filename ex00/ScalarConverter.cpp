@@ -1,12 +1,14 @@
 #include "ScalarConverter.hpp"
 
 #include <iostream>
+#include <iomanip>
 #include <stdlib.h>
 
 using std::cout;
 using std::endl;
 using std::exception;
 using std::istringstream;
+using std::setprecision;
 using std::string;
 
 ScalarConverter::ScalarConverter() {
@@ -43,13 +45,13 @@ void ScalarConverter::print(char c, int i, float f, double d, unsigned long flag
 	if (flags & F_IMPOSSIBLE) {
 		cout << "impossible";
 	} else if (flags & F_PLUSINF) {
-		cout << "+inf";
+		cout << "+inff";
 	} else if (flags & F_MINUSINF) {
-		cout << "-inf";
+		cout << "-inff";
 	} else if (flags & F_NAN) {
-		cout << "nan";
+		cout << "nanf";
 	} else {
-		cout << f << "f";
+		cout << setprecision(20) << f << "f";
 	}
 	cout << endl << "double: ";
 	if (flags & D_IMPOSSIBLE) {
@@ -61,7 +63,7 @@ void ScalarConverter::print(char c, int i, float f, double d, unsigned long flag
 	} else if (flags & D_NAN) {
 		cout << "nan";
 	} else {
-		cout << d;
+		cout << setprecision(20) << d;
 	}
 	cout << endl;
 }
@@ -114,8 +116,29 @@ int ScalarConverter::tryZero(const string &literal) {
 	return (0);
 }
 
+int	ScalarConverter::tryInf(const string &literal) {
+	if (literal == "inf" || literal == "+inf" || literal == "+inff" || literal == "inff") {
+		print(0, 0, 0.0f, 0.0, C_IMPOSSIBLE | I_IMPOSSIBLE | F_PLUSINF | D_PLUSINF);
+		return (1);
+	} else if (literal == "-inf" || literal == "-inff") {
+		print(0, 0, 0.0f, 0.0, C_IMPOSSIBLE | I_IMPOSSIBLE | F_MINUSINF | D_MINUSINF);
+		return (1);
+	} else if (literal == "nan" || literal == "nanf") {
+		print(0, 0, 0.0f, 0.0, C_IMPOSSIBLE | I_IMPOSSIBLE | F_NAN | D_NAN);
+		return (1);
+	}
+	return (0);
+}
+
 void ScalarConverter::convert(const string &literal) {
+	if (literal.empty()) {
+		print(0, 0, 0.0f, 0.0, C_IMPOSSIBLE | I_IMPOSSIBLE | F_IMPOSSIBLE | D_IMPOSSIBLE);
+		return;
+	}
 	if (ScalarConverter::tryZero(literal) == 0) {
+		return;
+	}
+	if (ScalarConverter::tryInf(literal)) {
 		return;
 	}
 	unsigned long flags = 0;
@@ -141,10 +164,14 @@ void ScalarConverter::convert(const string &literal) {
 	} else if (d != d) {
 		flags |= D_NAN;
 	}
+	if (flags & C_IMPOSSIBLE && !(flags & (D_IMPOSSIBLE | D_PLUSINF | D_MINUSINF | D_NAN)) && d >= 0 && d <= 127) {
+		c = static_cast<char>(d);
+		flags &= ~C_IMPOSSIBLE;
+	}
 	int i = static_cast<int>(d);
 	if (i == 0) {
 		flags |= I_IMPOSSIBLE;
-	} else if (i < -2147483648 || i > 2147483647) {
+	} else if (d < -2147483648 || d > 2147483647 || i < -2147483648 || i > 2147483647) {
 		flags |= I_IMPOSSIBLE;
 	}
 	float f = static_cast<float>(d);

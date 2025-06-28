@@ -24,6 +24,7 @@ private:
 	static const unsigned long D_NAN = 1024;
 	static void print(char c, int i, float f, double d, unsigned long flags);
 	static int tryZero(const string &literal);
+	static int tryInf(const string &literal);
 
 public:
 	static void convert(const string &literal);

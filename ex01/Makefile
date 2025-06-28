@@ -1,9 +1,9 @@
 CPP = c++
 COMPILE_FLAGS = -Wall -Wextra -Werror -std=c++98 -pedantic -g -c
 LINK_FLAGS = 
-NAME = ScalarConverter
+NAME = Serializer
 
-SRCS = main.cpp ScalarConverter.cpp
+SRCS = main.cpp Serializer.cpp
 OBJS = $(SRCS:.cpp=.o)
 
 $(NAME): $(OBJS)
