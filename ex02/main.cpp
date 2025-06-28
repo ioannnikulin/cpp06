@@ -61,6 +61,31 @@ static void identify(Base* p) {
 	cout << "Unknown type" << endl;
 }
 
+static void identify(Base& p) {
+	try {
+		A& a = dynamic_cast<A&>(p);
+		cout << "A" << endl;
+		(void)a;
+		return ;
+	} catch (...) {
+	}
+	try {
+		B& b = dynamic_cast<B&>(p);
+		cout << "B" << endl;
+		(void)b;
+		return ;
+	} catch (...) {
+	}
+	try {
+		C& c = dynamic_cast<C&>(p);
+		cout << "C" << endl;
+		(void)c;
+		return ;
+	} catch (...) {	
+	}
+	cout << "Unknown type" << endl;
+}
+
 static void autotest() {
 	streambuf *originalClog = clog.rdbuf();
 	ostringstream capturedClog;
@@ -77,6 +102,17 @@ static void autotest() {
 	for (int i = 0; i < 10; ++i) {
 		Base* basePtr = generate();
 		identify(basePtr);
+		if (capturedClog.str().find("A") != string::npos) {
+			assert(capturedCout.str().find("A") != string::npos);
+		} else if (capturedClog.str().find("B") != string::npos) {
+			assert(capturedCout.str().find("B") != string::npos);
+		} else if (capturedClog.str().find("C") != string::npos) {
+			assert(capturedCout.str().find("C") != string::npos);
+		} else {
+			assert(capturedCout.str().find("Unknown type") != string::npos);
+		}
+		capturedCout.str("");
+		identify(*basePtr);
 		if (capturedClog.str().find("A") != string::npos) {
 			assert(capturedCout.str().find("A") != string::npos);
 		} else if (capturedClog.str().find("B") != string::npos) {
